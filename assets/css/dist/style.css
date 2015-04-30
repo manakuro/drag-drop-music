@@ -1,0 +1,362 @@
+@charset "UTF-8";
+/*
+#overview
+Gulp入門サンプル
+ 
+サンプルファイルです
+*/
+/*#styleguide
+サンプル見出し１
+ 
+サンプルの見出しスタイル
+hoverすると青く2倍になる
+ 
+```
+&lt;h1&gt;見出し１&lt;/h1&gt;
+```
+*/
+/*--------------------
+    General Settings
+----------------------*/
+body, html {
+  height: 100%; }
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none; }
+
+/*--------------------
+    The file dropzone
+----------------------*/
+#drop-zone {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+  background-color: rgba(11, 133, 161, 0.75);
+  color: #fff;
+  text-align: center;
+  font: bold 36px sans-serif;
+  line-height: 90vh;
+  -webkit-transition: 0.4s;
+          transition: 0.4s; }
+  #drop-zone.hidden {
+    opacity: 0;
+    pointer-events: none;
+    -webkit-transition: 0.6s;
+            transition: 0.6s; }
+
+/*--------------------
+    app flex container
+----------------------*/
+#container {
+  height: 100%;
+  background-color: #fff;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  font: bold 15px sans-serif;
+  overflow: hidden; }
+  #container.disabled .instructions {
+    display: block; }
+  #container.disabled #wave {
+    display: none; }
+  #container.disabled #control-bar {
+    pointer-events: none; }
+  #container.disabled #track-details {
+    color: #758389; }
+  #container.disabled #track-details i {
+    display: none; }
+
+/*---------------------------
+    Cover Art Section
+----------------------------*/
+#cover-art {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 auto;
+      -ms-flex: 1 auto;
+          flex: 1 auto;
+  position: relative;
+  overflow: hidden;
+  pointer-events: none; }
+
+#cover-back {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
+  background-size: cover;
+  /* 背景画像をhtml要素にフィット */
+  margin: -12px;
+  /* ??? */ }
+
+#cover-art-small {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  top: 50%;
+  left: 50%;
+  margin: -200px auto auto -200px;
+  border-radius: 2px; }
+
+.instructions {
+  display: none;
+  position: absolute;
+  width: 280px;
+  font: 16px sans-serif;
+  color: #fff;
+  text-align: center;
+  top: 50%;
+  left: 50%;
+  margin-left: -140px;
+  margin-top: 280px; }
+
+/*---------------------------
+    Player Control Bar
+----------------------------*/
+#control-bar {
+  position: relative;
+  z-index: 10;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  color: #3D464A;
+  text-align: left; }
+
+.player-control {
+  -webkit-box-flex: 2;
+  -webkit-flex: 2;
+      -ms-flex: 2;
+          flex: 2;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+  .player-control div {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+        -ms-flex: 1;
+            flex: 1;
+    background-color: #fff;
+    text-align: center;
+    line-height: 60px;
+    height: 100%;
+    cursor: pointer; }
+  .player-control .disabled .player-control div {
+    color: #758389; }
+
+#shuffle-button.active, #repeat-button.active {
+  line-height: 60px;
+  color: #000; }
+
+#repeat-button i span {
+  display: none;
+  position: absolute;
+  font: bold 12px sans-serif;
+  color: #475b76;
+  top: 6px;
+  left: 13px; }
+
+/*---------------------------
+        Playlist
+---------------------------*/
+#playlist {
+  position: relative;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 3;
+  -webkit-flex: 3;
+      -ms-flex: 3;
+          flex: 3;
+  text-align: left; }
+
+#track-details {
+  position: relative;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  z-index: 20;
+  background-color: #fff;
+  padding: 0 30px 0 40px;
+  cursor: pointer;
+  white-space: nowrap; }
+  #track-details i {
+    line-height: 60px;
+    margin-right: 15px; }
+
+#track-desc {
+  line-height: 60px;
+  -webkit-box-flex: 6;
+  -webkit-flex: 6;
+      -ms-flex: 6;
+          flex: 6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  padding-right: 15px;
+  font-weight: normal; }
+
+#track-time {
+  line-height: 60px;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none; }
+
+/*  Expanding Playlist Bar */
+#expand-bar {
+  position: absolute;
+  z-index: 10;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: #fff;
+  color: #222;
+  cursor: default;
+  -webkit-transition: height 0.4s, box-shadow 0.2s;
+          transition: height 0.4s, box-shadow 0.2s;
+  height: 100vh;
+  box-shadow: -1px 0 2px 1px rgba(0, 0, 0, 0.15); }
+  #expand-bar.hidden {
+    height: 0;
+    box-shadow: none; }
+  #expand-bar form {
+    position: relative;
+    padding: 18px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    width: 100%;
+    background-color: #fff;
+    z-index: 40; }
+    #expand-bar form div {
+      position: absolute;
+      left: 113px;
+      right: 20px;
+      top: 11px; }
+    #expand-bar form input {
+      width: 100%;
+      font-size: 14px;
+      padding: 6px 8px;
+      border: 1px solid #ccc;
+      border-radius: 2px;
+      box-shadow: 0 1px 1px #eee; }
+
+/*  Playlist */
+#list {
+  position: absolute;
+  left: 0;
+  top: 55px;
+  bottom: 60px;
+  list-style: none;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden; }
+  #list li:nth-child(even) {
+    background-color: #F8F7F9; }
+
+.track {
+  padding: 18px;
+  cursor: pointer;
+  overflow: hidden;
+  color: #3D464A;
+  position: relative; }
+  .track.active {
+    background-color: #DBE0E4 !important; }
+    .track.active .overlay {
+      opacity: 1; }
+    .track.active span i {
+      opacity: 1; }
+  .track .title {
+    font-size: 18px;
+    margin-top: 14px;
+    margin-bottom: 4px;
+    font-weight: bold; }
+  .track .artist {
+    font-weight: normal; }
+  .track div:first-child {
+    position: relative;
+    width: 70px;
+    height: 70px;
+    margin-right: 25px;
+    float: left; }
+  .track .overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    -webkit-transition: 0.4s;
+            transition: 0.4s;
+    opacity: 0;
+    border-radius: 3px; }
+  .track div img {
+    width: 100%;
+    border-radius: 3px; }
+  .track span i {
+    color: #fff;
+    font-size: 22px;
+    line-height: 70px;
+    left: 28px;
+    position: absolute;
+    -webkit-transition: 0.4s;
+            transition: 0.4s;
+    opacity: 0; }
+  .track .remove-track {
+    position: absolute;
+    font-size: 22px;
+    top: 12px;
+    right: 18px;
+    color: #797979;
+    display: block; }
+
+/*---------------------------
+        Media queries
+---------------------------*/
+@media (max-width: 1200px) {
+  #control-bar {
+    -webkit-flex-flow: column wrap;
+    -ms-flex-flow: column wrap;
+        flex-flow: column wrap; }
+  .player-control {
+    -webkit-order: 2;
+    -webkit-box-ordinal-group: 3;
+        -ms-flex-order: 2;
+            order: 2; }
+  #playlist {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); }
+  #expand-bar {
+    padding-top: 120px;
+    bottom: 60px; }
+    #expand-bar.hidden {
+      padding-top: 0; }
+  #list {
+    bottom: 0;
+    top: 175px; } }
