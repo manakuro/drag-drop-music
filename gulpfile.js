@@ -24,9 +24,15 @@ var $ = require('gulp-load-plugins')(),
  *   JS
  * 
  */
-var srcfile = glob.sync('./assets/js/src/*.js'),
-    options = assign({}, watchify.args, { entries: srcfile, debug: true }),
-    b = watchify(browserify(options));
+var srcfile = glob.sync('./assets/js/src/**/*.js'),
+    browserify_op = {
+        entries: srcfile, 
+        debug: true,
+        // detectGlobals: false,
+        // builtins: []
+    },
+    options = assign({}, watchify.args, browserify_op),
+    b = watchify(browserify(options).require(srcfile));
 
 gulp.task('js', js_bundle);
 function js_bundle() {
@@ -62,7 +68,7 @@ function css_bundle() {
  *   default
  * 
  */
-gulp.task('default', ['server', 'js'], function(){
+gulp.task('default', ['js'], function(){
     b.on('update', js_bundle);
     b.on('log', $.util.log);
     gulp.watch('./assets/css/src/**/*.scss', ['css']);
