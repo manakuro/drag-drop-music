@@ -5,16 +5,32 @@ Backbone.$ = $;
 
 var View = {},
     Track = require("../models/track"),
-    Tracks = require("../collections/tracks");
+    Tracks = require("../collections/tracks"),
+    Utility = require("../utility");
 
 View = Backbone.View.extend({
     el: "#control-bar",
     ready: false, // when ready to start playing
+    timer: 0,
+    loading: false,
+    is_shuffle: false,
+    is_repeat: false,
+
     events: {
+        "click #next-button": "next",
+        "click #previous-button": "prev",
+        "click #play-button": "playbt",
+        "click #pause-button": "pause",
+        "click #stop-button": "stop",
+        "click #shuffle-button": "shuffle",
+        "click #repeat-button": "repeat"
     },
     initialize: function(_options) {
         var options = (_options) ? _options : {};
+
+        // referencies
         this.app = options.app;
+        this.utility = new Utility();
 
         // collection
         this.tracks = new Tracks();
@@ -38,11 +54,11 @@ View = Backbone.View.extend({
         // initialize
         this.wavesurfer.init({
             container: "#wave",
-            cursorColor: '#aaa',
+            cursorColor: "#aaa",
             cursorWidth: 1,
             height: 80,
-            waveColor: '#588efb',
-            progressColor: '#f043a4'
+            waveColor: "#588efb",
+            progressColor: "#f043a4"
         });
 
         // When a track is loaded and ready to play
@@ -56,13 +72,40 @@ View = Backbone.View.extend({
 
             // covert art
             if (tags.picture === "assets/img/default.png") {
-                $('#cover-back').css("background", "");
+                $("#cover-back").css("background", "");
             } else {
-                $('#cover-back').css("background-image", "url("+ tags.picture +")").css("background-repeat", "no-repeat").css("background-position", "center");
+                $("#cover-back").css("background-image", "url("+ tags.picture +")").css("background-repeat", "no-repeat").css("background-position", "center");
             }
-            $('#cover-art-small').attr('src', tags.picture);
+            $("#cover-art-small").attr("src", tags.picture);
 
-            
+            // artist and title.
+            $("#track-desc").html("<b>" + tags.title + "</b> by " + tags.artist);
+
+            // timer
+            $("#current").text("0:00");
+            $("#total").text(self.utility.secToMini(duration));
+            clearInterval(self.timer);
+            self.timer = setInterval(function(){
+                $("#current").text(self.utility.secToMini(self.wavesurfer.getCurrentTime()));
+            }, 1000);
+
+        });
+
+        // When the track finished playing
+        this.wavesurfer.on("finish", function(){
+            var number,
+                current = self.tracks.where({ playing: true })[0];
+
+            // shuffle
+            if (self.is_shuffle) {
+                number = Math.floor(Math.random() * self.tracks.length);
+            } else if (self.is_repeat) {
+                number = self.tracks.indexOf(current);
+            } else {
+                number = self.tracks.indexOf(current) + 1;
+            }
+
+            self.play(number);
         });
 
     },
@@ -70,26 +113,28 @@ View = Backbone.View.extend({
     /**
      *  set model to collection
      *
-     *  @method _setUp 
+     *  @method setUp 
      *  @param  {Obj} file
      *  @return  
      */
-    _setUp: function(file) {
+    setUp: function(file) {
         var self = this,
             attr = {};
 
-        attr.file = file;
         ID3.loadTags(file.name, function() {
             var tags = ID3.getAllTags(file.name),
-                model;
+                model = new Track();
+                
+            attr = model.toJSON();
+            attr.file = file;
 
             if (tags.picture) {
                 tags.picture = self.getImgSrc(tags.picture);
             }
 
-            attr.tags = tags;
-            model = new Track(attr);
-            self.tracks.add(model, {merge: true});
+            attr.tags = _.extend(attr.tags, tags);
+            model.set(attr);
+            self.tracks.add(model);
 
             if (!self.ready) {
                 self.play(0);
@@ -116,10 +161,16 @@ View = Backbone.View.extend({
             model, file;
 
         if (this.tracks.at(number)) {
+
+            // reset
+            this.tracks.each(function(track){
+                track.set({ playing: false });
+            });
+
             model = this.tracks.at(number);
             model.set({playing: true});
-            file = model.get("file");
 
+            file = model.get("file");
             this.reader(file, function(){
                 self.wavesurfer.loadBlob(file);
             });
@@ -158,6 +209,99 @@ View = Backbone.View.extend({
             base64String += String.fromCharCode(image.data[i]);
         }
         return "data:" + image.format + ";base64," + window.btoa(base64String);
+    },
+
+    /**
+     *  Plays next track
+     *
+     *  @method next 
+     *  @param  {Obj} e
+     *  @return  
+     */
+    next: function(e) {
+        var current_model = this.tracks.where({ playing: true })[0],
+            current_index = this.tracks.indexOf(current_model);
+
+        this.play(current_index + 1);
+    },
+
+    /**
+     *  Plays previous track
+     *
+     *  @method prev 
+     *  @param  {Obj} e
+     *  @return  
+     */
+    prev: function(e) {
+        var current_model = this.tracks.where({ playing: true })[0],
+            current_index = this.tracks.indexOf(current_model);
+
+        this.play(current_index - 1);
+    },
+
+    /**
+     *  Play current track
+     *
+     *  @method playbt 
+     *  @param  {Obj} e
+     *  @return  
+     */
+    playbt: function(e) {
+        this.wavesurfer.play();
+    },
+
+    /**
+     *  Pause track
+     *
+     *  @method pause 
+     *  @param  {Obj} e
+     *  @return  
+     */
+    pause: function(e) {
+        this.wavesurfer.playPause();
+    },
+
+    /**
+     *  Stop track
+     *
+     *  @method stop 
+     *  @param  {Obj} e
+     *  @return  
+     */
+    stop: function() {
+        this.wavesurfer.stop();
+    },
+
+    /**
+     *  Shuffle track
+     *
+     *  @method shuffle 
+     *  @param  {Obj} e
+     *  @return  
+     */
+    shuffle: function(e) {
+        e.preventDefault();
+
+        var target = $(e.target);
+
+        target.toggleClass("active");
+        this.is_shuffle = target.hasClass("active") === true;
+    },
+
+    /**
+     *  Repeat track
+     *
+     *  @method repeat 
+     *  @param  {Obj} e
+     *  @return  
+     */
+    repeat: function(e) {
+        e.preventDefault();
+
+        var target = $(e.target);
+
+        target.toggleClass("active");
+        this.is_repeat = target.hasClass("active") === true;
     }
 
 });

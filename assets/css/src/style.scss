@@ -156,11 +156,18 @@ body, html {
     }
 }
 
-#shuffle-button.active,
-#repeat-button.active{
+#shuffle-button,
+#repeat-button {
     line-height: 60px;
-    color: #000;
+    color: #758389;
+    position: relative;
+
+    .active {
+        line-height: 60px;
+        color: #000;
+    }
 }
+
 #repeat-button i span{
     display: none;
     position: absolute;

@@ -5,14 +5,16 @@ Backbone.$ = $;
 
 var model = Backbone.Model.extend({
         defaults: {
-            artist: "Unknown Artist",
-            title: "Unknown",
-            album: "",
-            picture: "assets/img/default.png",
+            tags: {
+                artist: "Unknown Artist",
+                title: "Unknown",
+                album: "",
+                picture: "assets/img/default.png",
+            },
+            file: {},
             playing: false
         },
         initialize: function() {
-            console.log("model initialize");
         }
     });
 

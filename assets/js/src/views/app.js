@@ -79,7 +79,7 @@ $(function(){
 
             var self = this,
                 items, item,
-                files;
+                files, entry;
 
             // chrome
             if (e.originalEvent.dataTransfer.items) {
@@ -94,7 +94,7 @@ $(function(){
                 files = e.originalEvent.dataTransfer.files;
                 _.each(files, function(file){
                     if (file.type.match(/audio\/(mp3|mpeg)/)) {
-                        self.player._setUp(file);
+                        self.player.setUp(file);
                     }
                 });
             }
@@ -114,12 +114,16 @@ $(function(){
         traverseEntry: function(entry) {
             var self = this,
                 model,
-                dir_reader;
+                dir_reader,
+                timer;
 
             if (entry.isFile) {
+                self.player.loading = true;
                 entry.file(function(file){
                     if (file.type.match(/audio\/mp3/)) {
-                        self.player._setUp(file);
+                        console.log("start: ", file.name, self.player.loading);
+                        self.player.loading = true;
+                        self.player.setUp(file);
                     }
                 });
 

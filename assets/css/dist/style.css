@@ -165,9 +165,13 @@ body, html {
   .player-control .disabled .player-control div {
     color: #758389; }
 
-#shuffle-button.active, #repeat-button.active {
+#shuffle-button, #repeat-button {
   line-height: 60px;
-  color: #000; }
+  color: #758389;
+  position: relative; }
+  #shuffle-button .active, #repeat-button .active {
+    line-height: 60px;
+    color: #000; }
 
 #repeat-button i span {
   display: none;
