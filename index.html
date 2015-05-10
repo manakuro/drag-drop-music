@@ -10,42 +10,58 @@
 </head>
 <body>
     <div id="container" class="disabled">
-        <div id="cover-art">
-            <div id="cover-back"></div>
-            <img id="cover-art-small" src="assets/img/folder.png" />
-            <div class="instructions"></div>
-        </div>
-        <div id="wave"></div>
-        <div id="control-bar">
-            <div class="player-control">
-                <div id="previous-button"><i class="fa fa-fast-backward"></i></div>
-                <div id="play-button"><i class="fa fa-play"></i></div>
-                <div id="pause-button"><i class="fa fa-pause"></i></div>
-                <div id="stop-button"><i class="fa fa-stop"></i></div>
-                <div id="next-button"><i class="fa fa-fast-forward"></i></div>
-                <div id="shuffle-button"><i class="fa fa-random"></i></div>
-                <div id="repeat-button"><i class="fa fa-repeat"><span>1</span></i></div>
+        <div id="player">
+            <div id="cover-art">
+                <div id="cover-back"></div>
+                <img id="cover-art-small" src="assets/img/folder.png" />
+                <div class="instructions"></div>
             </div>
-            <div id="playlist">
-                <div id="track-details" title="Show playlist">
-                    <i class="fa fa-sort"></i>
-                    <p id="track-desc">There are no tracks loaded in the player.</p>
-                    <p id="track-time">
-                        <span id="current">-</span> / <span id="total">-</span>
-                    </p>
+            <div id="wave"></div>
+            <div id="control-bar">
+                <div class="player-control">
+                    <div id="previous-button"><i class="fa fa-fast-backward"></i></div>
+                    <div id="play-button"><i class="fa fa-play"></i></div>
+                    <div id="pause-button"><i class="fa fa-pause"></i></div>
+                    <div id="stop-button"><i class="fa fa-stop"></i></div>
+                    <div id="next-button"><i class="fa fa-fast-forward"></i></div>
+                    <div id="shuffle-button"><i class="fa fa-random"></i></div>
+                    <div id="repeat-button"><i class="fa fa-repeat"><span>1</span></i></div>
                 </div>
-                <div id="expand-bar" class="hidden">
-                    <form>
-                        <label for="searchBox">Search</label><div><input id="searchBox" type="search" name="search"></div>
-                    </form>
-                    <ul id="list"></ul>
+                <div id="playlist">
+                    <div id="track-details" title="Show playlist">
+                        <i class="fa fa-sort"></i>
+                        <p id="track-desc">There are no tracks loaded in the player.</p>
+                        <p id="track-time">
+                            <span id="current">-</span> / <span id="total">-</span>
+                        </p>
+                    </div>
+                    <div id="expand-bar" class="hidden">
+                        <form id="search">
+                            <label for="search_box">Search</label><div><input id="search_box" type="search" name="search"></div>
+                        </form>
+                        <ul id="tracklist"></ul>
+                    </div>
                 </div>
             </div>
+            <div id="drop-zone" class="hidden">Drag &amp; Drop Files Here</div>
+
         </div>
-        <div id="drop-zone" class="hidden">Drag &amp; Drop Files Here</div>
     </div>
     <script src="assets/js/libs/id3-minimized.js"></script>
     <script src="assets/js/libs/wavesurfer.min.js"></script>
     <script src="assets/js/dist/bundle.js"></script>
 </body>
+
+<script type="text/template" id="tmp-tracklist">
+<li class="track <%= active %>" data-cid="<%= cid  %>">
+    <div>
+        <span class="overlay"><i class="fa fa-play"></i></span><img src="<%= picture %>">
+    </div>
+    <div>
+        <p class="title"><%= title %></p>
+        <p class="artist"><%= artist %></p>
+        <span title="Remove Track From Player" class="remove-track">×</span>
+    </div>
+</li>
+</script>
 </html>

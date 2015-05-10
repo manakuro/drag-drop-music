@@ -7,7 +7,8 @@ $(function(){
     "use strict";
 
     // modules (view, model, collection)
-    var Player = require("./player");
+    var Player = require("./player"),
+        Utility = require("../utility");
 
     var App = Backbone.View.extend({
         el: "body",
@@ -19,6 +20,8 @@ $(function(){
         },
 
         initialize: function() {
+
+            this.utility = new Utility();
             this.player = new Player({ app: this });
         },
 

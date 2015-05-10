@@ -4,12 +4,12 @@ var $ = require("jquery"),
 Backbone.$ = $;
 
 var View = {},
+    TrackList = require("./tracklist"),
     Track = require("../models/track"),
-    Tracks = require("../collections/tracks"),
-    Utility = require("../utility");
+    Tracks = require("../collections/tracks");
 
 View = Backbone.View.extend({
-    el: "#control-bar",
+    el: "#player",
     ready: false, // when ready to start playing
     timer: 0,
     loading: false,
@@ -23,14 +23,24 @@ View = Backbone.View.extend({
         "click #pause-button": "pause",
         "click #stop-button": "stop",
         "click #shuffle-button": "shuffle",
-        "click #repeat-button": "repeat"
+        "click #repeat-button": "repeat",
+
+        "click #track-details": "toggleTrackList",
+        "toggleTrackList #track-details": "toggleTrackList",
+        "click #cover-art": "triggerHideTrackList"
     },
     initialize: function(_options) {
         var options = (_options) ? _options : {};
 
         // referencies
         this.app = options.app;
-        this.utility = new Utility();
+        this.utility = this.app.utility;
+
+        // view
+        this.tracklist = new TrackList({
+            app: this.app,
+            player: this
+        });
 
         // collection
         this.tracks = new Tracks();
@@ -89,6 +99,8 @@ View = Backbone.View.extend({
                 $("#current").text(self.utility.secToMini(self.wavesurfer.getCurrentTime()));
             }, 1000);
 
+            self.tracklist.render();
+
         });
 
         // When the track finished playing
@@ -130,9 +142,12 @@ View = Backbone.View.extend({
 
             if (tags.picture) {
                 tags.picture = self.getImgSrc(tags.picture);
+            } else {
+                tags.picture = "assets/img/default.png";
             }
 
-            attr.tags = _.extend(attr.tags, tags);
+            // attr.tags = _.extend(attr.tags, tags);
+            attr.tags = tags;
             model.set(attr);
             self.tracks.add(model);
 
@@ -302,7 +317,61 @@ View = Backbone.View.extend({
 
         target.toggleClass("active");
         this.is_repeat = target.hasClass("active") === true;
-    }
+    },
+
+    /**
+     *  Show or close track list
+     *
+     *  @method toggleTrackList 
+     *  @param  {Obj} e
+     *  @return  
+     */
+    toggleTrackList: function(e){
+        var bar = $("#expand-bar");
+
+        if (bar.hasClass("hidden")) {
+            bar.removeClass("hidden");
+            $(e.target).attr("title", "Hide Playlist");
+        } else {
+            bar.addClass("hidden");
+            $(e.target).attr("title", "Show Playlist");
+        }
+    },
+
+    /**
+     *  trigger hide operation in track list
+     *
+     *  @method triggerHideTrackList 
+     *  @param  types
+     *  @return  
+     */
+    triggerHideTrackList: function(e) {
+        e.preventDefault();
+        if (!$("#expand-bar").hasClass("hidden")) {
+            $("#track-details").trigger("toggleTrackList");
+        }
+    },
+
+    /**
+     *  Rest playlist
+     *
+     *  @method reset 
+     *  @param  types
+     *  @return  
+     */
+    reset: function() {
+        this.tracks.reset();
+        this.wavesurfer.empty();
+        clearInterval(this.timer);
+
+        $('#cover-back').css("background", "");
+        $('#cover-art-small').attr('src', 'assets/img/folder.png');
+        $('#expand-bar').addClass('hidden');
+        $('#track-desc').html('There are no tracks loaded in the player.');
+        $('#current').text('-');
+        $('#total').text('-');
+        $('#container').addClass('disabled');
+    },
 
 });
 
