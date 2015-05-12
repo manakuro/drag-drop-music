@@ -5,6 +5,10 @@ Backbone.$ = $;
 
 var View = Backbone.View.extend({
     el: "#expand-bar",
+    rendering_limit: 4,
+    show_more: false,
+    show_more_models: [],
+    search_timer: "",
 
     pre_templated: {
         tracklist: "#tmp-tracklist"
@@ -14,8 +18,9 @@ var View = Backbone.View.extend({
     events: {
         "click .track": "playTrack",
         "click .remove-track": "removeTrack",
-        "keydown #search": "search",
-        "submit #search": "search"
+        "keyup #search_box": "search",
+        "submit #search": "search",
+        "click #show_more": "showMore"
     },
     initialize: function(_options) {
         var options = (_options) ? _options : {};
@@ -36,17 +41,40 @@ var View = Backbone.View.extend({
             self.templates[key] = _.template($(template).html());
         });
     },
-    render: function() {
-        var self = this,
-            html = '';
 
-        this.player.tracks.each(function(model){
-            var attr = model.get("tags");
+    /**
+     *  Render track list
+     *
+     *  @method render 
+     *  @param  {Obj} _options {
+     *          {Obj}    models: ()
+     *          {String} html:   ()
+     *  }
+     *  @return  
+     */
+    render: function(_options) {
+        var options = (_options) ? _options : {},
+            self = this,
+            models = options.models || this.player.tracks.slice(0, this.rendering_limit),
+            html = options.html || "";
 
-            attr.cid = model.cid;
-            attr.active = (model.get("playing")) ? "active" : "";
-            html += self.templates.tracklist(attr);
-        });
+        if (this.show_more) {
+            Array.prototype.push.apply(models, this.show_more_models);
+        }
+
+        if (html === "") {
+            _.each(models, function(model){
+                var attr = model.get("tags");
+
+                attr.cid = model.cid;
+                attr.active = (model.get("playing")) ? "active" : "";
+                html += self.templates.tracklist(attr);
+            });
+
+            if (!this.show_more && this.show_more_models.length > 0) {
+                html += '<li class="track show_more"><span id="show_more">Show '+ this.show_more_models.length +' More</span>';
+            }
+        }
 
         $("#tracklist").html(html);
     },
@@ -102,11 +130,69 @@ var View = Backbone.View.extend({
      *  @return  
      */
     search: function(e) {
-        e.preventDefault();
 
-        console.log("seach");
+        // When submit event is occured
+        if (e.type === "submit") e.preventDefault();
 
+        var self = this,
+            val = $(e.target).val(),
+            filtered = [],
+            model, tags,
+            string, html = "";
 
+        // clear
+        clearTimeout(this.search_timer);
+        this.show_more_models = [];
+        this.show_more = false;
+
+        this.search_timer = setTimeout(function(){
+            val = val.toLowerCase();
+            for (var i = 0; i < self.player.tracks.length; i++) {
+                model = self.player.tracks.models[i];
+                tags = model.get("tags");
+                string = tags.artist + " " + tags.title;
+
+                string = string.toLowerCase();
+                if (string.indexOf(val) !== -1) {
+                    if (!self.show_more && filtered.length >= self.rendering_limit) {
+                        self.show_more_models.push(model);
+                        continue;
+                    }
+
+                    filtered.push(model);
+                }
+            }
+
+            self.render({
+                models: filtered
+            });
+        }, 200);
+    },
+
+    /**
+     *  Render the rest of searched tracks
+     *
+     *  @method showMore 
+     *  @param  types
+     *  @return  
+     */
+    showMore: function() {
+        this.show_more = true;
+        this.render();
+    },
+
+    /**
+     *  Highlight a playing track
+     *
+     *  @method highlightPlayingTrack 
+     *  @param  types
+     *  @return  
+     */
+    highlightPlayingTrack: function() {
+        var model = this.player.tracks.where({ playing: true })[0];
+
+        $("#tracklist").find(".track").removeClass("active");
+        $("#tracklist_row_" + model.cid).addClass("active");
     }
 
 });

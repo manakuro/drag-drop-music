@@ -1,20 +1,4 @@
 @charset "UTF-8";
-/*
-#overview
-Gulp入門サンプル
- 
-サンプルファイルです
-*/
-/*#styleguide
-サンプル見出し１
- 
-サンプルの見出しスタイル
-hoverすると青く2倍になる
- 
-```
-&lt;h1&gt;見出し１&lt;/h1&gt;
-```
-*/
 /*--------------------
     General Settings
 ----------------------*/
@@ -29,6 +13,24 @@ body, html {
      -moz-user-select: none;
       -ms-user-select: none;
           user-select: none; }
+
+/*---------------------------
+        form input
+---------------------------*/
+input {
+  display: block;
+  width: 100%;
+  font-size: 14px;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  box-shadow: 0 1px 1px #eee;
+  -webkit-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+          transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s; }
+
+input:focus {
+  outline: 0;
+  border-color: 1px solid #1f92de;
+  box-shadow: 0px 0px 3px 2px #88a1d4; }
 
 /*--------------------
     The file dropzone
@@ -273,18 +275,21 @@ body, html {
     width: 100%;
     background-color: #fff;
     z-index: 40; }
-    #expand-bar form div {
+    #expand-bar form .input_wrapper {
       position: absolute;
-      left: 113px;
-      right: 20px;
-      top: 11px; }
-    #expand-bar form input {
-      width: 100%;
-      font-size: 14px;
-      padding: 6px 8px;
-      border: 1px solid #ccc;
-      border-radius: 2px;
-      box-shadow: 0 1px 1px #eee; }
+      left: 20px;
+      right: 220px;
+      top: 3px; }
+    #expand-bar form .search {
+      padding-left: 34px;
+      background-color: transparent;
+      border-radius: 23px; }
+    #expand-bar form label {
+      position: absolute;
+      left: 35px;
+      top: 9px; }
+    #expand-bar form .fa-search {
+      font-size: 14px; }
 
 /*  Playlist */
 #tracklist {
@@ -296,11 +301,11 @@ body, html {
   width: 100%;
   overflow-y: auto;
   overflow-x: hidden; }
-  #tracklist li:nth-child(even) {
+  #tracklist li:nth-child(even):not(.show_more) {
     background-color: #F8F7F9; }
 
 .track {
-  padding: 18px;
+  padding: 9px;
   cursor: pointer;
   overflow: hidden;
   color: #3D464A;
@@ -354,6 +359,18 @@ body, html {
     right: 18px;
     color: #797979;
     display: block; }
+  .track.show_more {
+    cursor: default; }
+    .track.show_more span {
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+      color: #758389;
+      cursor: pointer;
+      -webkit-transition: color ease-in-out .15s;
+              transition: color ease-in-out .15s; }
+    .track.show_more span:hover {
+      color: #000; }
 
 /*---------------------------
         Media queries

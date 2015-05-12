@@ -99,7 +99,7 @@ View = Backbone.View.extend({
                 $("#current").text(self.utility.secToMini(self.wavesurfer.getCurrentTime()));
             }, 1000);
 
-            self.tracklist.render();
+            self.tracklist.highlightPlayingTrack();
 
         });
 

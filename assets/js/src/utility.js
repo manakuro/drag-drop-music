@@ -27,9 +27,9 @@ module.exports = Backbone.View.extend({
      *  Returns pad digits with leading zeros in a string
      *
      *  @method zeroFill
-     *  @param  {Int} 　　 $num   ()
-     *  @param  {Int} 　　 $digit ()
-     *  @return {String}  $num　　()
+     *  @param  {Int} 　　 num   ()
+     *  @param  {Int} 　　 digit ()
+     *  @return {String}  num　　()
      */
     zeroFill: function(num, digit) {
         var i;
@@ -40,6 +40,36 @@ module.exports = Backbone.View.extend({
         }
 
         return num.slice(-digit);
+    },
+
+    /**
+     *  Returns converted a one byte character
+     *
+     *  @method toOneByteChars
+     *  @param  {String} val ()
+     */
+    toOneByteChars:function(val) {        
+        if ( val === '' || typeof val === 'undefined' ) return val;
+
+        return val.replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(s) {
+            return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+        });        
+    },
+
+    /**
+     *  Returns a formated string
+     *
+     *  @method formatString 
+     *  @param  {String} val()
+     *  @return {String} val() 
+     */
+    formatString: function(val) {
+        if ( val === '' || typeof val === 'undefined' ) return val;
+
+        val = this.toOneByteChars(val);
+        val = val.replace(/^\s+|\s+$/g, '');
+        val = val.toLowerCase();
+        return val;
     }
 
 });
