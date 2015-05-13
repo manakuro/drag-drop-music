@@ -96,7 +96,7 @@ $(function(){
             } else {
                 files = e.originalEvent.dataTransfer.files;
                 _.each(files, function(file){
-                    if (file.type.match(/audio\/(mp3|mpeg)/)) {
+                    if (/audio\/(mp3|mpeg|x-m4a)/.test(file.type)) {
                         self.player.setUp(file);
                     }
                 });
@@ -123,7 +123,7 @@ $(function(){
             if (entry.isFile) {
                 self.player.loading = true;
                 entry.file(function(file){
-                    if (file.type.match(/audio\/mp3/)) {
+                    if (/audio\/(mp3|x-m4a)/.test(file.type)) {
                         console.log("start: ", file.name, self.player.loading);
                         self.player.loading = true;
                         self.player.setUp(file);
