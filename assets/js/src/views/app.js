@@ -116,16 +116,12 @@ $(function(){
          */
         traverseEntry: function(entry) {
             var self = this,
-                model,
-                dir_reader,
-                timer;
+                dir_reader;
 
             if (entry.isFile) {
-                self.player.loading = true;
                 entry.file(function(file){
                     if (/audio\/(mp3|x-m4a)/.test(file.type)) {
-                        console.log("start: ", file.name, self.player.loading);
-                        self.player.loading = true;
+                        // console.log("start: ", file.name);
                         self.player.setUp(file);
                     }
                 });

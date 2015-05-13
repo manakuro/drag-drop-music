@@ -9,7 +9,6 @@ var View = {},
 
 View = Backbone.View.extend({
     el: "#player",
-    ready: false, // when ready to start playing
     timer: 0,
     is_shuffle: false,
     is_repeat: false,
@@ -127,30 +126,32 @@ View = Backbone.View.extend({
      */
     setUp: function(file) {
         var self = this,
-            attr = {};
+            attr = {},
+            model;
+
+        model = new Track();
+        attr = model.toJSON();
+        attr.file = file;
+        model.set(attr);
+        this.tracklist.tracks.add(model);
 
         ID3.loadTags(file.name, function() {
             var tags = ID3.getAllTags(file.name),
-                model = new Track();
-                
-            attr = model.toJSON();
-            attr.file = file;
+                defalut_tags;
+
+            // console.log("loaded: ", file.name);
+            defalut_tags = $.extend(true, {}, attr.tags);
 
             if (tags.picture) {
                 tags.picture = self.getImgSrc(tags.picture);
-            } else {
-                tags.picture = "assets/img/default.png";
             }
-
-            // attr.tags = _.extend(attr.tags, tags);
-            attr.tags = tags;
+            attr.tags = _.extend(defalut_tags, tags);
             model.set(attr);
-            self.tracklist.tracks.add(model);
 
-            if (!self.ready) {
+            // play just only first track
+            if (self.tracklist.tracks.at(0).cid === model.cid) {
                 self.play(0);
                 $('#container').removeClass('disabled');
-                self.ready = true;
             }
 
         },{
@@ -161,7 +162,7 @@ View = Backbone.View.extend({
     },
 
     /**
-     *  Read file and Play it on browser
+     *  Read file and play it on browser
      *
      *  @method play 
      *  @param  {Number} number
@@ -193,14 +194,14 @@ View = Backbone.View.extend({
      *
      *  @method reader 
      *  @param  {Obj} file
-     *  @param  {Function} onFinish
+     *  @param  {Function} callback
      *  @return  
      */
-    reader: function(file, onFinish) {
+    reader: function(file, callback) {
         var reader = new FileReader();
 
         reader.onload = function(data) {
-            onFinish(data);
+            callback(data);
         };
 
         reader.readAsDataURL(file);
