@@ -5,14 +5,12 @@ Backbone.$ = $;
 
 var View = {},
     TrackList = require("./tracklist"),
-    Track = require("../models/track"),
-    Tracks = require("../collections/tracks");
+    Track = require("../models/track");
 
 View = Backbone.View.extend({
     el: "#player",
     ready: false, // when ready to start playing
     timer: 0,
-    loading: false,
     is_shuffle: false,
     is_repeat: false,
 
@@ -42,9 +40,6 @@ View = Backbone.View.extend({
             player: this
         });
 
-        // collection
-        this.tracks = new Tracks();
-
         // libraries
         this.wavesurfer = Object.create(WaveSurfer);
         this.wavesurferSetUp();
@@ -73,7 +68,7 @@ View = Backbone.View.extend({
 
         // When a track is loaded and ready to play
         this.wavesurfer.on("ready", function() {
-            var model = self.tracks.where({ playing: true })[0],
+            var model = self.tracklist.tracks.where({ playing: true })[0],
                 tags = model.get("tags"),
                 duration;
 
@@ -99,6 +94,7 @@ View = Backbone.View.extend({
                 $("#current").text(self.utility.secToMini(self.wavesurfer.getCurrentTime()));
             }, 1000);
 
+            // track list
             self.tracklist.highlightPlayingTrack();
 
         });
@@ -106,15 +102,15 @@ View = Backbone.View.extend({
         // When the track finished playing
         this.wavesurfer.on("finish", function(){
             var number,
-                current = self.tracks.where({ playing: true })[0];
+                current = self.tracklist.tracks.where({ playing: true })[0];
 
             // shuffle
             if (self.is_shuffle) {
-                number = Math.floor(Math.random() * self.tracks.length);
+                number = Math.floor(Math.random() * self.tracklist.tracks.length);
             } else if (self.is_repeat) {
-                number = self.tracks.indexOf(current);
+                number = self.tracklist.tracks.indexOf(current);
             } else {
-                number = self.tracks.indexOf(current) + 1;
+                number = self.tracklist.tracks.indexOf(current) + 1;
             }
 
             self.play(number);
@@ -149,7 +145,7 @@ View = Backbone.View.extend({
             // attr.tags = _.extend(attr.tags, tags);
             attr.tags = tags;
             model.set(attr);
-            self.tracks.add(model);
+            self.tracklist.tracks.add(model);
 
             if (!self.ready) {
                 self.play(0);
@@ -175,14 +171,14 @@ View = Backbone.View.extend({
         var self = this,
             model, file;
 
-        if (this.tracks.at(number)) {
+        if (this.tracklist.tracks.at(number)) {
 
             // reset
-            this.tracks.each(function(track){
+            this.tracklist.tracks.each(function(track){
                 track.set({ playing: false });
             });
 
-            model = this.tracks.at(number);
+            model = this.tracklist.tracks.at(number);
             model.set({playing: true});
 
             file = model.get("file");
@@ -234,8 +230,8 @@ View = Backbone.View.extend({
      *  @return  
      */
     next: function(e) {
-        var current_model = this.tracks.where({ playing: true })[0],
-            current_index = this.tracks.indexOf(current_model);
+        var current_model = this.tracklist.tracks.where({ playing: true })[0],
+            current_index = this.tracklist.tracks.indexOf(current_model);
 
         this.play(current_index + 1);
     },
@@ -248,8 +244,8 @@ View = Backbone.View.extend({
      *  @return  
      */
     prev: function(e) {
-        var current_model = this.tracks.where({ playing: true })[0],
-            current_index = this.tracks.indexOf(current_model);
+        var current_model = this.tracklist.tracks.where({ playing: true })[0],
+            current_index = this.tracklist.tracks.indexOf(current_model);
 
         this.play(current_index - 1);
     },
@@ -353,14 +349,14 @@ View = Backbone.View.extend({
     },
 
     /**
-     *  Rest playlist
+     *  Reset play list
      *
      *  @method reset 
      *  @param  types
      *  @return  
      */
     reset: function() {
-        this.tracks.reset();
+        this.tracklist.tracks.reset();
         this.wavesurfer.empty();
         clearInterval(this.timer);
 

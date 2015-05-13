@@ -3,9 +3,11 @@ var $ = require("jquery"),
     Backbone = require("backbone");
 Backbone.$ = $;
 
+var Tracks = require("../collections/tracks");
+
 var View = Backbone.View.extend({
     el: "#expand-bar",
-    rendering_limit: 4,
+    rendering_limit: 9,
     show_more: false,
     show_more_models: [],
     search_timer: "",
@@ -29,6 +31,9 @@ var View = Backbone.View.extend({
         this.app = options.app;
         this.player = options.player;
         this.utility = this.player.utility;
+
+        // collection
+        this.tracks = new Tracks();
 
         // load template
         this.loadTemplate();
@@ -55,7 +60,7 @@ var View = Backbone.View.extend({
     render: function(_options) {
         var options = (_options) ? _options : {},
             self = this,
-            models = options.models || this.player.tracks.slice(0, this.rendering_limit),
+            models = options.models || this.tracks.slice(0, this.rendering_limit),
             html = options.html || "";
 
         if (this.show_more) {
@@ -88,8 +93,8 @@ var View = Backbone.View.extend({
      */
     playTrack: function(e){
         var cid = $(e.target).closest(".track").data("cid"),
-            current_model = this.player.tracks.get(cid),
-            number = this.player.tracks.indexOf(current_model);
+            current_model = this.tracks.get(cid),
+            number = this.tracks.indexOf(current_model);
 
         this.player.play(number);
     },
@@ -104,20 +109,20 @@ var View = Backbone.View.extend({
     removeTrack: function(e) {
         var target = $(e.target).closest(".track"),
             cid = target.data("cid"),
-            current_model = this.player.tracks.get(cid),
+            current_model = this.tracks.get(cid),
             number;
 
-        this.player.tracks.remove(current_model);
+        this.tracks.remove(current_model);
         target.slideUp("normal", function(){
             $(this).remove();
         });
 
         if (current_model.get("playing")) {
-            if (this.player.tracks.length === 0) {
+            if (this.tracks.length === 0) {
                 this.player.reset();
                 return;
             }
-            number = this.player.tracks.indexOf(current_model) + 1;
+            number = this.tracks.indexOf(current_model) + 1;
             this.player.play(number);
         }
     },
@@ -138,6 +143,7 @@ var View = Backbone.View.extend({
             val = $(e.target).val(),
             filtered = [],
             model, tags,
+            is_match,
             string, html = "";
 
         // clear
@@ -147,13 +153,19 @@ var View = Backbone.View.extend({
 
         this.search_timer = setTimeout(function(){
             val = val.toLowerCase();
-            for (var i = 0; i < self.player.tracks.length; i++) {
-                model = self.player.tracks.models[i];
+            val = val.replace(/　/g, " ");
+            val = val.split(" ");
+            for (var i = 0; i < self.tracks.length; i++) {
+                is_match = true;
+                model = self.tracks.models[i];
                 tags = model.get("tags");
                 string = tags.artist + " " + tags.title;
-
                 string = string.toLowerCase();
-                if (string.indexOf(val) !== -1) {
+
+                _.each(val, function(keyword){
+                    if (string.indexOf(keyword) === -1) is_match = false;
+                });
+                if (is_match) {
                     if (!self.show_more && filtered.length >= self.rendering_limit) {
                         self.show_more_models.push(model);
                         continue;
@@ -189,7 +201,7 @@ var View = Backbone.View.extend({
      *  @return  
      */
     highlightPlayingTrack: function() {
-        var model = this.player.tracks.where({ playing: true })[0];
+        var model = this.tracks.where({ playing: true })[0];
 
         $("#tracklist").find(".track").removeClass("active");
         $("#tracklist_row_" + model.cid).addClass("active");

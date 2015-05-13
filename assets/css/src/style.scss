@@ -105,7 +105,8 @@ input:focus {
 }
 #cover-back {
     flex: 1;
-    background-size: cover; /* 背景画像をhtml要素にフィット */
+    background-size: cover; 
+    /* 背景画像をhtml要素にフィット */
     margin: -12px; /* ??? */
     -webkit-filter: blur(7px); /* ぼかし */
 }
