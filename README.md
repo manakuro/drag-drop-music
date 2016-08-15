@@ -1,2 +1,2 @@
 # drag-drop-music
-It is a music player which you can just drag and drop mp3 files from your computer into your browser.
+This is a music player that you can just drag and drop mp3 files from your computer into your browser.
